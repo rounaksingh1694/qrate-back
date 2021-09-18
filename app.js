@@ -11,7 +11,7 @@ const userRoutes = require("./routes/user")
 const authRoutes = require("./routes/auth")
 const rescollectionRoutes = require("./routes/rescollection")
 
-mongoose.connect(process.env.DATABASE,
+mongoose.connect("mongodb+srv://somnathmishra:somnathmishra@cluster0.7qwn4.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     {
         useNewUrlParser: true, 
         useUnifiedTopology: true,
