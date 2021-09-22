@@ -10,6 +10,7 @@ const cors = require("cors")
 const userRoutes = require("./routes/user")
 const authRoutes = require("./routes/auth")
 const rescollectionRoutes = require("./routes/rescollection")
+const metadataRoutes = require("./routes/linkmetadata")
 
 mongoose.connect("mongodb+srv://somnathmishra:LWTVkIMW79aCiGEX@cluster0.bmh7h.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     {
@@ -31,7 +32,7 @@ app.use(cors())
 app.use("/api", authRoutes)
 app.use("/api", userRoutes)
 app.use("/api", rescollectionRoutes)
-
+app.use("/api", metadataRoutes)
 
 //dot env see docs for more explaination
 const port = process.env.PORT || 8000;

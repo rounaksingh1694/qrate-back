@@ -3,11 +3,11 @@ const {ObjectId} = mongoose.Schema
 
 const LinkSchema  =new mongoose.Schema({
     url: String,
-    // title: String,
-    // publisher: String,
-    // description: String,
-    // extraData: String,
-    // type: String
+    title: String,
+    publisher: String,
+    description: String,
+    extraData: String,
+    type: String
 })
 
 const Link = mongoose.model("Link", LinkSchema)
