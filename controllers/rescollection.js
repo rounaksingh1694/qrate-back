@@ -70,7 +70,7 @@ exports.createResourceCollection = (req, res) => {
 
 	ResCollection.create(rescollection, (error, newResCollection) => {
 		if (error || !newResCollection) {
-			return getErrorMesaageInJson(res, 400, "Failed to create post");
+			return getErrorMesaageInJson(res, 400, "Failed to create rescollection");
 		}
 
 		User.findOneAndUpdate(
@@ -79,7 +79,7 @@ exports.createResourceCollection = (req, res) => {
 			{ new: true },
 			(err, user) => {
 				if (err || !user) {
-					return getErrorMesaageInJson(res, 400, "Failed to create post");
+					return getErrorMesaageInJson(res, 400, "Failed to create rescollection");
 				}
 				newResCollection
 					.populate("user", USER_FIELDS_TO_POPULATE)
@@ -101,7 +101,6 @@ exports.addALinktoResCollection = (req, res) => {
 		{ new: true },
 		(error, newResCollection) => {
 			if (error || !newResCollection) {
-				console.error("ERROR IN LIKE", error);
 				return getErrorMesaageInJson(res, 400, "Failed to add a link");
 			}
 			res.status(200).json(newResCollection)
