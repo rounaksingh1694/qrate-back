@@ -16,7 +16,7 @@ const metascraper = require('metascraper')([
   
 
 
-router.get("/metadata", async (req, res) => {
+router.post("/metadata", async (req, res) => {
         const link = req.body.link    
         const { body: html, url } = await got(link)
         const metadata = await metascraper({ html, url })
