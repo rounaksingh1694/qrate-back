@@ -18,7 +18,7 @@ router.post(
 	createResourceCollection
 );
 
-router.get("/update/:collectionId/:userId", isSignedIn, isAuthenticated, addALinktoResCollection);
+router.post("/update/:collectionId/:userId", isSignedIn, isAuthenticated, addALinktoResCollection);
 
 router.get("/resourcecollections/:userId", isSignedIn, isAuthenticated, getResourcesOfTheUser )
 
