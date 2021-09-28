@@ -3,6 +3,7 @@ const {ObjectId} = mongoose.Schema
 
 const LinkSchema  =new mongoose.Schema({
     url: String,
+    image :String,
     title: String,
     publisher: String,
     description: String,
