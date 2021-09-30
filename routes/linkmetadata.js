@@ -35,7 +35,7 @@ router.post("/metadata", async (req, resp) => {
                
               }else if(res.ogSiteName.toLowerCase() == "youtube") {
                 
-                type = "youtube.com"
+                type = "Youtube"
                 if(res.pathname.toLowerCase().includes('playlist')){
                   type = "YT Playlist"
                 }
@@ -43,7 +43,7 @@ router.post("/metadata", async (req, resp) => {
                 axios.get('https://www.youtube.com/oembed?url='+link)
                 .then(response => {
                   author = response.data.author_name
-                  sendResp(res, resp, metadata, type, extra, author)
+                  sendResp(res, resp, metadata, type, extra, author, response.data.title)
                         })
                       .catch(error => {
                         console.log(error);
@@ -81,10 +81,9 @@ router.post("/metadata", async (req, resp) => {
         
 });
 
-function sendResp(res, resp, metadata, type, extra, author){
+function sendResp(res, resp, metadata, type, extra, author, title = res.title){
             var publisher = res.host
             var description = res.ogDescription   
-            var title = res.title
             var reso = {
               "author": author ,
               "date": metadata.date,
