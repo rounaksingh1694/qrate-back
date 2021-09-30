@@ -36,9 +36,7 @@ exports.getResourcesOfTheUser = (req, res) => {
 			.populate("rescollection", "_id name links")
 			.execPopulate()
 			.then(() => {
-			
 					res.status(200).json(user.rescollection)
-				
 			});
 	});
 };

@@ -10,7 +10,6 @@ router.post("/signup",
 , signup)
 
 router.post("/signin",
-
     check('password', 'Password is required').isLength({min: 1}),
     check('email', 'Email is required').isEmail()
 , signin)
