@@ -15,6 +15,7 @@ const metascraper = require('metascraper')([
 
 router.post("/metadata", async (req, resp) => {
         const link = req.body.link  
+        const UA = req.headers['user-agent']
         var type;
         var extra ;
         var author = ""
@@ -47,7 +48,13 @@ router.post("/metadata", async (req, resp) => {
                   _url = res.twitterPlayer
                 }
                 var author_name;  
-                axios.get('https://www.youtube.com/oembed?url='+link)
+                let options = {
+                  headers: {
+                    'User-Agent': UA
+                  }
+                }
+                
+                axios.get('https://www.youtube.com/oembed?url='+link, options)
                 .then(response => {
                   author = response.data.author_name
                   sendResp(res, resp, metadata, type, extra, author, _url)
