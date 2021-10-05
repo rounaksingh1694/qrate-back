@@ -9,7 +9,8 @@ const LinkSchema  =new mongoose.Schema({
     publisher: String,
     description: String,
     extraData: String,
-    type: String
+    type: String,
+    ogType: String
 })
 
 const Link = mongoose.model("Link", LinkSchema)
