@@ -18,20 +18,24 @@ router.post("/metadata", async (req, resp) => {
         var type;
         var extra ;
         var author = ""
+        var ogType = ""
+        var _url = link
 
         const { body: html, url } = await got(link)
         const metadata = await metascraper({ html, url })
         author = metadata.author
+        
         extract({ uri: link }, (err, res) =>{
               console.log(res.ogSiteName.toLowerCase() + " " + res.ogType)
+              ogType = res.ogType
               if(res.ogSiteName.toLowerCase() == 'medium' && res.ogType == 'article'){
                 
-                type = "Medium"
+                type = "Medium "
                 extra = {
                   "reading_time": res.twitterData1
                 }
 
-                sendResp(res, resp, metadata, type, extra, author)
+                sendResp(res, resp, metadata, type, extra, author,  _url)
                
               }else if(res.ogSiteName.toLowerCase() == "youtube") {
                 
@@ -39,11 +43,14 @@ router.post("/metadata", async (req, resp) => {
                 if(res.pathname.toLowerCase().includes('playlist')){
                   type = "YT Playlist"
                 }
+                if(res.ogType == "video.other"){
+                  _url = res.twitterPlayer
+                }
                 var author_name;  
                 axios.get('https://www.youtube.com/oembed?url='+link)
                 .then(response => {
                   author = response.data.author_name
-                  sendResp(res, resp, metadata, type, extra, author, response.data.title)
+                  sendResp(res, resp, metadata, type, extra, author, _url)
                         })
                       .catch(error => {
                         console.log(error);
@@ -59,7 +66,7 @@ router.post("/metadata", async (req, resp) => {
                 .then(response => {
                   console.log(response); 
                   author = response.data.author_name
-                  sendResp(res, resp, metadata, type, extra, author)
+                  sendResp(res, resp, metadata, type, extra, author,  _url)
                         })
                       .catch(error => {
                         console.log(error);
@@ -71,7 +78,7 @@ router.post("/metadata", async (req, resp) => {
               else {
                 console.log("aya hai bhai4")
                 type =""    
-                sendResp(res, resp, metadata, type, extra, author)
+                sendResp(res, resp, metadata, type, extra, author,  _url)
               }
               
             });
@@ -81,8 +88,9 @@ router.post("/metadata", async (req, resp) => {
         
 });
 
-function sendResp(res, resp, metadata, type, extra, author, title = res.title){
+function sendResp(res, resp, metadata, type, extra, author,  url){
             var publisher = res.host
+           var  title = res.title
             var description = res.ogDescription   
             var reso = {
               "author": author ,
@@ -92,7 +100,9 @@ function sendResp(res, resp, metadata, type, extra, author, title = res.title){
               "extra": extra,
               "publisher": publisher,
               "description": description,
-              "title": title
+              "title": title,
+              "ogType": res.ogType,
+              "url": url
             }
             resp.status(200).send(reso)
             
