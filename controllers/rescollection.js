@@ -105,3 +105,18 @@ exports.addALinktoResCollection = (req, res) => {
 		}
 	);
 };
+
+exports.deleteResCollection = (req, res) => {
+	const rescollection = req.rescollection;
+	rescollection.remove((err, deletedProduct) => {
+        if(err){
+            return res.status(400).json({
+                error: "Failed to delete this product"
+            })
+        }
+        res.json({
+            message: "Deletion was a success",
+            deletedProduct
+        })
+    })
+}

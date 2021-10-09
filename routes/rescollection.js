@@ -3,7 +3,7 @@ var router = express.Router()
 const { check } = require('express-validator');
 const { getUserById, getUser, updateUser , userPurchaseList} = require("../controllers/user");
 const { isSignedIn, isAuthenticated, isAdmin } = require("../controllers/auth");
-const{getResourcesOfTheUser,  getResCollectionById, createResourceCollection, addALinktoResCollection} = require("../controllers/rescollection")
+const{getResourcesOfTheUser,  getResCollectionById, createResourceCollection, addALinktoResCollection, deleteResCollection} = require("../controllers/rescollection")
 
 router.param("userId", getUserById);
 router.param("collectionId", getResCollectionById);
@@ -20,6 +20,8 @@ router.post(
 
 router.post("/update/:collectionId/:userId", isSignedIn, isAuthenticated, addALinktoResCollection);
 
-router.get("/resourcecollections/:userId", isSignedIn, isAuthenticated, getResourcesOfTheUser )
+router.get("/resourcecollections/:userId", isSignedIn, isAuthenticated, getResourcesOfTheUser );
+
+router.delete("/delete/:collectionId/:userId", isSignedIn, isAuthenticated, deleteResCollection)
 
 module.exports = router;
