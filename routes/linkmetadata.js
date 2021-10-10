@@ -57,6 +57,7 @@ router.post("/metadata", async (req, resp) => {
                 axios.get('https://www.youtube.com/oembed?url='+link, options)
                 .then(response => {
                   author = response.data.author_name
+                  res.title = response.data.title
                   sendResp(res, resp, metadata, type, extra, author, _url)
                         })
                       .catch(error => {
