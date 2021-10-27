@@ -1,36 +1,68 @@
 const {
     extract
   } = require('article-parser');
-  
+  var { Readability } = require('@mozilla/readability');
+var { JSDOM } = require('jsdom');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+const got = require('got')
+const extract = require('meta-extractor');
+
 
 const express = require("express");
 const router = express.Router();
 
 var TurndownService = require('turndown')
 
-  var turndownService = new TurndownService()
+var turndownService = new TurndownService()
 
 router.post("/articledata", (req, res) => {
 	console.log(req.body.link);
     const url = req.body.link
-	extract(url).then((article) => {
-      
-        var markdown = ""
-        console.log(article)
-        if(article.source == "Medium"){
-           article = clearContent(article)
+    extract({ uri: url }, (err, res) =>{
+      if(res.ogSiteName.toLowerCase() == 'medium' && res.ogType == 'article'){
+        async function fetchData(){
+          const response = await fetch("https://ddnews.gov.in/national/india-remains-committed-strengthening-respect-shared-values-pm-modi-16th-east-asia-summit");
+          const body = await response.text();
+          //console.log(body);
+          var doc = new JSDOM(body, {
+            url: "https://ddnews.gov.in/national/india-remains-committed-strengthening-respect-shared-values-pm-modi-16th-east-asia-summit"
+          });
+          let reader = new Readability(doc.window.document);
+          let article = reader.parse();
+          var content = article.content
+          const markdown = turndownService.turndown(content)
+          article.content = markdown
+          res.status(200).send(article);
         }
-        
-        var content = article.content
+        fetchData()
+      }else{
+        extract(url).then((article) => {
       
-        markdown = turndownService.turndown(content)
+          var markdown = ""
+          console.log(article)
+          if(article.source == "Medium"){
+             article = clearContent(article)
+          }else{
+            
+          }
+          
+          var content = article.content
+        
+          markdown = turndownService.turndown(content)
+  
+          article.content = markdown
+  
+          res.status(200).send(article);
+        }).catch((err) => {
+          console.log(err);
+        });
+      }
+    });
+    
+    
 
-        article.content = markdown
-
-        res.status(200).send(article);
-      }).catch((err) => {
-        console.log(err);
-      });
+	
     
 });
 
