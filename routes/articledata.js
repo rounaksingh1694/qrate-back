@@ -6,7 +6,7 @@ var { JSDOM } = require('jsdom');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const got = require('got')
-const extract = require('meta-extractor');
+const extract2 = require('meta-extractor');
 
 
 const express = require("express");
@@ -19,14 +19,14 @@ var turndownService = new TurndownService()
 router.post("/articledata", (req, res) => {
 	console.log(req.body.link);
     const url = req.body.link
-    extract({ uri: url }, (err, res) =>{
-      if(res.ogSiteName.toLowerCase() == 'medium' && res.ogType == 'article'){
+    extract2({ uri: url }, (err, res2) =>{
+      if(res2.ogSiteName.toLowerCase() == 'medium' && res2.ogType == 'article'){
         async function fetchData(){
-          const response = await fetch("https://ddnews.gov.in/national/india-remains-committed-strengthening-respect-shared-values-pm-modi-16th-east-asia-summit");
+          const response = await fetch(url);
           const body = await response.text();
           //console.log(body);
           var doc = new JSDOM(body, {
-            url: "https://ddnews.gov.in/national/india-remains-committed-strengthening-respect-shared-values-pm-modi-16th-east-asia-summit"
+            url: url
           });
           let reader = new Readability(doc.window.document);
           let article = reader.parse();
