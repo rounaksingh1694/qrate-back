@@ -546,26 +546,27 @@ exports.searchResCollections = (req, res, searchQuery) => {
 	ResCollection.aggregate([
 		{
 			$match: {
-				$and: [
+				$or: [
 					{
 						name: { $regex: searchQuery, $options: "sxi" },
 					},
 					{
-						visibility: "PUBLIC",
+						tags: { $regex: searchQuery, $options: "sxi" },
 					},
 				],
 			},
 		},
-	]).exec((error, rescollection) => {
-		if (error || !rescollection) {
+	]).exec((error, rescollections) => {
+		if (error || !rescollections) {
 			return this.getErrorMesaageInJson(
 				res,
 				400,
 				"Cannot get rescollectionById"
 			);
 		}
-		console.log("RES COLLS", rescollection);
-		res.status(200).json({ resCollection: rescollection });
+		console.log("RES COLLS", rescollections);
+		const rescols = rescollections.filter((rc) => rc.visibility === "PUBLIC");
+		res.status(200).json({ resCollection: rescols });
 	});
 };
 
@@ -695,4 +696,18 @@ exports.getUser = (req, res) => {
 				res.status(200).json(user);
 			}
 		});
+};
+
+exports.getResCollectionByCategory = (req, res) => {
+	ResCollection.find({
+		category: req.body.category,
+		visibility: "PUBLIC",
+	}).exec((error, rescols) => {
+		if (error || !rescols) {
+			console.log(error);
+			res.status(400).json({ error: "Cannot get top picks" });
+		} else {
+			res.status(200).json(rescols);
+		}
+	});
 };

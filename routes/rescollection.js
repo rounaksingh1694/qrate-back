@@ -29,6 +29,7 @@ const {
 	getTopPicks,
 	changeDescriptionOfResCollection,
 	getUser,
+	getResCollectionByCategory,
 } = require("../controllers/rescollection");
 
 router.param("userId", getUserById);
@@ -130,6 +131,13 @@ router.get(
 router.get("/toppicks/:userId", isSignedIn, isAuthenticated, getTopPicks);
 
 router.get("/getuser/:userId", isSignedIn, isAuthenticated, getUser);
+
+router.post(
+	"/getcollectionsbycategory/:userId",
+	isSignedIn,
+	isAuthenticated,
+	getResCollectionByCategory
+);
 
 router.get("/categories", getCategories);
 
