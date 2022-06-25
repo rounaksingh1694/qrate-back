@@ -61,7 +61,25 @@ exports.isHisOwnOrPublic = (req, res, next) => {
 };
 
 exports.getResCollection = (req, res) => {
-	res.status(200).json(req.rescollection);
+	if (String(req.rescollection.user._id) === String(req.profile._id)) {
+		console.log("SAME USER");
+		console.log("RES RES COLL SS", req.rescollection);
+		res.status(200).json(req.rescollection);
+	} else {
+		ResCollection.findByIdAndUpdate(
+			{ _id: req.rescollection._id },
+			{ $inc: { views: 1 } },
+			{ new: true }
+		).exec((error, newResCollection) => {
+			if (error || !newResCollection) {
+				return res.status(404).json({
+					error: "Collection not found",
+				});
+			}
+			console.log("RES CON VV", newResCollection);
+			res.status(200).json(newResCollection);
+		});
+	}
 };
 
 exports.getNameAndIdOfCollection = (req, res) => {
@@ -122,7 +140,7 @@ exports.extractMetadata = (req, res, next) => {
 			_url = "",
 			extra = "",
 			twitterData1 = "";
-			favicon = ""
+		favicon = "";
 
 		_url = link;
 
@@ -130,7 +148,7 @@ exports.extractMetadata = (req, res, next) => {
 		const body = await response.text();
 		try {
 			const { body: html, url } = await got(link);
-			
+
 			const metadata = await metascraper({ html, url });
 			author = metadata.author;
 			date = metadata.date;
@@ -157,9 +175,9 @@ exports.extractMetadata = (req, res, next) => {
 			//console.log("Title :- "+titles[0].text)
 			ogTitle = titles[0].text;
 		}
-		var ic  = doc.window.document.querySelector("link[rel*='icon']")
-		if(ic){
-			favicon = ic.href
+		var ic = doc.window.document.querySelector("link[rel*='icon']");
+		if (ic) {
+			favicon = ic.href;
 		}
 		var metas = doc.window.document.querySelectorAll("meta");
 		for (var i = 0; i < metas.length; i++) {
@@ -192,7 +210,8 @@ exports.extractMetadata = (req, res, next) => {
 				description: ogDescription,
 				title: ogTitle,
 				ogType: ogType,
-				url: _url, favicon: favicon
+				url: _url,
+				favicon: favicon,
 			};
 
 			console.log("RESO", reso);
@@ -203,7 +222,7 @@ exports.extractMetadata = (req, res, next) => {
 			//console.log(reso)
 		} else if (ogSiteName.toLowerCase() == "youtube") {
 			customtype = "Youtube";
-			console.log("link : "+link)
+			console.log("link : " + link);
 			if (link.toLowerCase().includes("playlist")) {
 				customtype = "YT Playlist";
 			}
@@ -229,7 +248,8 @@ exports.extractMetadata = (req, res, next) => {
 						description: ogDescription,
 						title: ogTitle,
 						ogType: ogType,
-						url: _url,favicon: favicon
+						url: _url,
+						favicon: favicon,
 					};
 
 					console.log("RESO", reso);
@@ -242,7 +262,7 @@ exports.extractMetadata = (req, res, next) => {
 				});
 		} else if (ogSiteName.toLowerCase() == "twitter") {
 			customtype = "Twitter";
-			console.log("aya h biro")
+			console.log("aya h biro");
 			var reso = {
 				author: author,
 				date: date,
@@ -253,54 +273,57 @@ exports.extractMetadata = (req, res, next) => {
 				description: ogDescription,
 				title: ogTitle,
 				ogType: ogType,
-				url: _url,favicon: favicon
+				url: _url,
+				favicon: favicon,
 			};
 
 			console.log("RESO", reso);
-			if(link.includes("/status/")){
-			axios
-				.get("https://publish.twitter.com/oembed?url=" + link)
-				.then((response) => {
-					// fs.writeFileSync('yehu3.html', response.data.html)
-					var document = new JSDOM(response.data.html, {
-						url: link,
-					}).window.document;
-					var root = document.getElementsByClassName("twitter-tweet");
-					if (root.length > 0) {
-						author = response.data.author_name;
-						var firstChild =
-							document.getElementsByClassName("twitter-tweet")[0].firstChild;
-						var tweet = firstChild.innerHTML;
-						ogTitle = tweet.substring(0, tweet.indexOf("<"));
-						ogType = "article";
-					}
+			if (link.includes("/status/")) {
+				axios
+					.get("https://publish.twitter.com/oembed?url=" + link)
+					.then((response) => {
+						// fs.writeFileSync('yehu3.html', response.data.html)
+						var document = new JSDOM(response.data.html, {
+							url: link,
+						}).window.document;
+						var root = document.getElementsByClassName("twitter-tweet");
+						if (root.length > 0) {
+							author = response.data.author_name;
+							var firstChild =
+								document.getElementsByClassName("twitter-tweet")[0].firstChild;
+							var tweet = firstChild.innerHTML;
+							ogTitle = tweet.substring(0, tweet.indexOf("<"));
+							ogType = "article";
+						}
 
-					var reso = {
-						author: author,
-						date: date,
-						image: ogImage,
-						type: customtype,
-						extraData: extra,
-						publisher: publisher,
-						description: ogDescription,
-						title: ogTitle,
-						ogType: ogType,
-						url: _url,favicon: favicon
-					};
+						var reso = {
+							author: author,
+							date: date,
+							image: ogImage,
+							type: customtype,
+							extraData: extra,
+							publisher: publisher,
+							description: ogDescription,
+							title: ogTitle,
+							ogType: ogType,
+							url: _url,
+							favicon: favicon,
+						};
 
-					console.log("RESO", reso);
+						console.log("RESO", reso);
 
-					req.metadata = reso;
-					next();
+						req.metadata = reso;
+						next();
 
-					//console.log(reso)
-				})
-				.catch((error) => {
-					//console.log(error);
-				});}else{
-					req.metadata = reso;
-			next();
-				}
+						//console.log(reso)
+					})
+					.catch((error) => {
+						//console.log(error);
+					});
+			} else {
+				req.metadata = reso;
+				next();
+			}
 		} else {
 			//console.log("aya hai bhai4")
 			customtype = ogType;
@@ -314,7 +337,8 @@ exports.extractMetadata = (req, res, next) => {
 				description: ogDescription,
 				title: ogTitle,
 				ogType: ogType,
-				url: _url, favicon: favicon
+				url: _url,
+				favicon: favicon,
 			};
 
 			console.log("RESO", reso);
@@ -497,25 +521,52 @@ exports.changeTagsOfResCollection = (req, res) => {
 	});
 };
 
+exports.changeDescriptionOfResCollection = (req, res) => {
+	const rescollection = req.rescollection;
+	const descr = req.body.description;
+	console.log("DESCRRR ", descr);
+	rescollection.description = descr;
+	return rescollection.save().then((newRescollection, err) => {
+		if (err) {
+			return res.status(400).json({
+				error: "Failed to change description of this Collection",
+			});
+		}
+		res.json({
+			message: "Collection's description Changed",
+			newRescollection,
+		});
+	});
+};
+
 exports.searchResCollections = (req, res, searchQuery) => {
 	var searchQuery = req.query.q;
 	console.log("Search Query :" + searchQuery);
 
-	ResCollection.find({
-		$and: [{ $text: { $search: searchQuery } }, { visibility: "PUBLIC" }],
-	})
-
-		.limit(10)
-		.exec((error, rescollection) => {
-			if (error || !rescollection) {
-				return this.getErrorMesaageInJson(
-					res,
-					400,
-					"Cannot get rescollectionById"
-				);
-			}
-			res.status(200).json({ resCollection: rescollection });
-		});
+	ResCollection.aggregate([
+		{
+			$match: {
+				$and: [
+					{
+						name: { $regex: searchQuery, $options: "sxi" },
+					},
+					{
+						visibility: "PUBLIC",
+					},
+				],
+			},
+		},
+	]).exec((error, rescollection) => {
+		if (error || !rescollection) {
+			return this.getErrorMesaageInJson(
+				res,
+				400,
+				"Cannot get rescollectionById"
+			);
+		}
+		console.log("RES COLLS", rescollection);
+		res.status(200).json({ resCollection: rescollection });
+	});
 };
 
 exports.getCategories = (req, res) => {
@@ -557,7 +608,7 @@ exports.star = (req, res) => {
 					if (!rescol)
 						return getErrorMesaageInJson(res, 400, "Cannot update the res col");
 
-					res.status(200).json({ updateStatus: true });
+					res.status(200).json(rescol);
 				}
 			);
 		}
@@ -599,9 +650,49 @@ exports.unstar = (req, res) => {
 					if (!rescol)
 						return getErrorMesaageInJson(res, 400, "Cannot update the res col");
 
-					res.status(200).json({ updateStatus: true });
+					res.status(200).json(rescol);
 				}
 			);
 		}
 	);
+};
+
+exports.getTopPicks = (req, res) => {
+	ResCollection.aggregate([
+		{
+			$project: {
+				starsCount: { $size: { $ifNull: ["$stars", []] } },
+				name: 1,
+				links: 1,
+				description: 1,
+				views: 1,
+				stars: 1,
+			},
+		},
+		{
+			$sort: { starsCount: -1 },
+		},
+	])
+		.limit(5)
+		.exec((error, rescols) => {
+			if (error || !rescols) {
+				console.log(error);
+				res.status(400).json({ error: "Cannot get top picks" });
+			} else {
+				res.status(200).json(rescols);
+			}
+		});
+};
+
+exports.getUser = (req, res) => {
+	User.findOne({ _id: req.profile._id })
+		.populate("starred")
+		.exec((error, user) => {
+			if (error || !user) {
+				console.log(error);
+				res.status(400).json({ error: "Cannot get user" });
+			} else {
+				res.status(200).json(user);
+			}
+		});
 };

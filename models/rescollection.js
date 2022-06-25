@@ -24,7 +24,7 @@ const LinkSchema = new mongoose.Schema({
 	extraData: String,
 	type: String,
 	ogType: String,
-	favicon:String
+	favicon: String,
 });
 
 const Link = mongoose.model("Link", LinkSchema);
@@ -56,6 +56,14 @@ const ResCollectionSchema = new mongoose.Schema({
 			ref: "User",
 		},
 	],
+	views: {
+		type: Number,
+		default: 0,
+	},
+	description: {
+		type: String,
+		default: "",
+	},
 });
 
 ResCollectionSchema.index({ tags: "text", name: "text" });

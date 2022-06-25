@@ -3,7 +3,6 @@ var router = express.Router();
 const { check } = require("express-validator");
 const {
 	getUserById,
-	getUser,
 	updateUser,
 	userPurchaseList,
 } = require("../controllers/user");
@@ -27,6 +26,9 @@ const {
 	unstar,
 	extractMetadata,
 	deleteNull,
+	getTopPicks,
+	changeDescriptionOfResCollection,
+	getUser,
 } = require("../controllers/rescollection");
 
 router.param("userId", getUserById);
@@ -64,7 +66,7 @@ router.post(
 );
 
 router.post(
-	"/changevisiblity/:collectionId/:userId",
+	"/changevisibility/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	changeVisibilityOfResCollection
@@ -82,6 +84,13 @@ router.post(
 	isSignedIn,
 	isAuthenticated,
 	changeTagsOfResCollection
+);
+
+router.post(
+	"/changedescription/:collectionId/:userId",
+	isSignedIn,
+	isAuthenticated,
+	changeDescriptionOfResCollection
 );
 
 router.get("/search", searchResCollections);
@@ -117,6 +126,10 @@ router.get(
 	isAuthenticated,
 	unstar
 );
+
+router.get("/toppicks/:userId", isSignedIn, isAuthenticated, getTopPicks);
+
+router.get("/getuser/:userId", isSignedIn, isAuthenticated, getUser);
 
 router.get("/categories", getCategories);
 
