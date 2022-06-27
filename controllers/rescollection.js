@@ -424,17 +424,31 @@ exports.deleteALinkFromResCollection = (req, res) => {
 	console.log("req " + req.body.link_id);
 
 	rescollection.links.pull(linkId);
-	return rescollection.save().then((deletedCollection, err) => {
-		if (err) {
-			return res.status(400).json({
-				error: "Failed to delete link from this Collection",
+	if (rescollection.links.length > 0) {
+		return rescollection.save().then((deletedCollection, err) => {
+			if (err) {
+				return res.status(400).json({
+					error: "Failed to delete link from this Collection",
+				});
+			}
+			res.json({
+				message: "Deletion was a success",
+				deletedCollection,
 			});
-		}
-		res.json({
-			message: "Deletion was a success",
-			deletedCollection,
 		});
-	});
+	} else {
+		return rescollection.remove((err, deletedCollection) => {
+			if (err) {
+				return res.status(400).json({
+					error: "Failed to delete this Collection",
+				});
+			}
+			res.json({
+				message: "Deletion was a success",
+				deletedCollection,
+			});
+		});
+	}
 };
 
 exports.deleteNull = (req, res) => {
@@ -661,6 +675,11 @@ exports.unstar = (req, res) => {
 exports.getTopPicks = (req, res) => {
 	ResCollection.aggregate([
 		{
+			$match: {
+				$and: [{ visibility: "PUBLIC" }],
+			},
+		},
+		{
 			$project: {
 				starsCount: { $size: { $ifNull: ["$stars", []] } },
 				name: 1,
@@ -674,7 +693,7 @@ exports.getTopPicks = (req, res) => {
 			$sort: { starsCount: -1 },
 		},
 	])
-		.limit(5)
+		.limit(3)
 		.exec((error, rescols) => {
 			if (error || !rescols) {
 				console.log(error);

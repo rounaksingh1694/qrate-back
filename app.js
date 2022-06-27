@@ -15,18 +15,16 @@ const ytRoutes = require("./routes/ytplaylistRoutes");
 const articleDataRoutes = require("./routes/articledata");
 
 mongoose
-	.connect(
-		"mongodb+srv://somnathmishra:LWTVkIMW79aCiGEX@cluster0.bmh7h.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-		{
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useCreateIndex: true,
-		}
-	)
+	.connect(process.env.LINODE_DATABASE_HOST, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		useCreateIndex: true,
+	})
 	.then(() => {
 		console.log("DB CONNECTED");
 	})
-	.catch(() => {
+	.catch((e) => {
+		console.log(e);
 		console.log("DB NOT CONNECTED");
 	});
 
@@ -36,9 +34,9 @@ app.use(cookieParser());
 app.use(cors());
 
 //My Routes
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
-app.use("/api", rescollectionRoutes);
+app.use("/api/collection/", rescollectionRoutes);
 app.use("/api", metadataRoutes);
 app.use("/api", ytRoutes);
 app.use("/api", articleDataRoutes);

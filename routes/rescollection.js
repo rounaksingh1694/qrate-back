@@ -45,7 +45,7 @@ router.post(
 );
 
 router.get(
-	"/:userId/collection/:collectionId",
+	"/:userId/:collectionId",
 	isSignedIn,
 	isHisOwnOrPublic,
 	getResCollection
@@ -60,35 +60,35 @@ router.post(
 );
 
 router.post(
-	"/deletelink/:collectionId/:userId",
+	"/delete/link/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	deleteALinkFromResCollection
 );
 
 router.post(
-	"/changevisibility/:collectionId/:userId",
+	"/change/visibility/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	changeVisibilityOfResCollection
 );
 
 router.post(
-	"/changecategory/:collectionId/:userId",
+	"/change/category/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	changeCategoryOfResCollection
 );
 
 router.post(
-	"/changetags/:collectionId/:userId",
+	"/change/tags/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	changeTagsOfResCollection
 );
 
 router.post(
-	"/changedescription/:collectionId/:userId",
+	"/change/description/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
 	changeDescriptionOfResCollection
@@ -97,14 +97,14 @@ router.post(
 router.get("/search", searchResCollections);
 
 router.get(
-	"/resourcecollections/:userId",
+	"/user/all/:userId",
 	isSignedIn,
 	isAuthenticated,
 	getResourcesOfTheUser
 );
 
 router.get(
-	"/getnameandidofcollection/:userId",
+	"/name/id/:userId",
 	isSignedIn,
 	isAuthenticated,
 	getNameAndIdOfCollection
@@ -128,12 +128,12 @@ router.get(
 	unstar
 );
 
-router.get("/toppicks/:userId", isSignedIn, isAuthenticated, getTopPicks);
+router.get("/top/picks/:userId", isSignedIn, isAuthenticated, getTopPicks);
 
 router.get("/getuser/:userId", isSignedIn, isAuthenticated, getUser);
 
 router.post(
-	"/getcollectionsbycategory/:userId",
+	"/by/category/:userId",
 	isSignedIn,
 	isAuthenticated,
 	getResCollectionByCategory
