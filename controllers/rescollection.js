@@ -5,11 +5,13 @@ const fetch = (...args) =>
 const User = require("../models/user");
 const { ResCollection, categories } = require("../models/rescollection");
 
-const {
-	validationResult,
-} = require("express-validator");
+const { validationResult } = require("express-validator");
 
 const USER_FIELDS_TO_POPULATE = "_id username name";
+
+exports.getErrorMesageInJson = (res, statusCode, errorMessage) => {
+	return res.status(statusCode).json({ error: errorMessage });
+};
 
 exports.getResCollectionById = (req, res, next, rescollectionId) => {
 	ResCollection.findById(rescollectionId).exec((error, rescollection) => {
@@ -17,7 +19,7 @@ exports.getResCollectionById = (req, res, next, rescollectionId) => {
 			return this.getErrorMesageInJson(
 				res,
 				400,
-				"Error faced in fetching resource collection"
+				"Sorry, we encountered an error in loading collection."
 			);
 		}
 		rescollection
@@ -31,19 +33,20 @@ exports.getResCollectionById = (req, res, next, rescollectionId) => {
 };
 
 exports.isHisOwn = (req, res, next) => {
-	try{
-	if (String(req.rescollection.user._id) === String(req.profile._id)) {
-		next();
-	} else {
-		return res.status(401).json({
-			error: "Access denied",
-		});
-	}}catch(error){
+	try {
+		if (String(req.rescollection.user._id) === String(req.profile._id)) {
+			next();
+		} else {
+			return res.status(401).json({
+				error: "Access denied",
+			});
+		}
+	} catch (error) {
 		return res.status(404).json({
-			error: "Couldn't fetch",
+			error: "Couldn't load collection",
 		});
 	}
-}
+};
 
 exports.isHisOwnOrPublic = (req, res, next) => {
 	let isAuthenticated =
@@ -76,7 +79,7 @@ exports.getResCollection = (req, res) => {
 		).exec((error, newResCollection) => {
 			if (error || !newResCollection) {
 				return res.status(404).json({
-					error: "Collection not found",
+					error: "Sorry we cannot find this collection at this time.",
 				});
 			}
 			res.status(200).json(newResCollection);
@@ -110,11 +113,11 @@ exports.getResourcesOfTheUser = (req, res) => {
 			return this.getErrorMesageInJson(
 				res,
 				400,
-				"Error faced in fetching resource collection"
+				"Sorry, we encountered an error in loading your collections."
 			);
 		}
 		user
-			.populate("rescollection", "_id name links")
+			.populate("rescollection", "_id name links category")
 			.execPopulate()
 			.then(() => {
 				res.status(200).json(user.rescollection);
@@ -122,24 +125,15 @@ exports.getResourcesOfTheUser = (req, res) => {
 	});
 };
 
-exports.getErrorMesageInJson = (res, statusCode, errorMessage) => {
-	return res.status(statusCode).json({ error: errorMessage });
-};
-
-
-
 exports.createResourceCollection = (req, res) => {
-
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-
 		return res.status(401).json({
 			error: errors.array()[0].msg,
 			parameter: errors.array()[0].param,
 		});
 	}
 	const body = req.body;
-
 
 	const rescollection = {
 		name: body.rescollection.name,
@@ -149,7 +143,7 @@ exports.createResourceCollection = (req, res) => {
 
 	ResCollection.create(rescollection, (error, newResCollection) => {
 		if (error || !newResCollection) {
-			return getErrorMesageInJson(res, 400, "Failed to create rescollection");
+			return getErrorMesageInJson(res, 400, "Failed to create collection");
 		}
 
 		User.findOneAndUpdate(
@@ -158,11 +152,7 @@ exports.createResourceCollection = (req, res) => {
 			{ new: true },
 			(err, user) => {
 				if (err || !user) {
-					return getErrorMesageInJson(
-						res,
-						400,
-						"Failed to create rescollection"
-					);
+					return getErrorMesageInJson(res, 400, "Failed to create collection");
 				}
 				newResCollection
 					.populate("user", USER_FIELDS_TO_POPULATE)
@@ -185,7 +175,7 @@ exports.addALinktoResCollection = (req, res) => {
 			});
 		}
 		res.json({
-			message: "Addition was a success",
+			message: "Addition successful",
 			newRescollection,
 		});
 	});
@@ -204,7 +194,7 @@ exports.deleteALinkFromResCollection = (req, res) => {
 				});
 			}
 			res.json({
-				message: "Deletion was a success",
+				message: "Deletion successful",
 				deletedCollection,
 			});
 		});
@@ -216,7 +206,7 @@ exports.deleteALinkFromResCollection = (req, res) => {
 				});
 			}
 			res.json({
-				message: "Deletion was a success",
+				message: "Deletion successful",
 				deletedCollection,
 			});
 		});
@@ -232,33 +222,31 @@ exports.deleteResCollection = (req, res) => {
 			});
 		}
 		res.json({
-			message: "Deletion was a success",
+			message: "Deletion successful",
 			deletedCollection,
 		});
 	});
 };
 
 exports.changeVisibilityOfResCollection = (req, res) => {
-		const rescollection = req.rescollection;
+	const rescollection = req.rescollection;
 	const visibility = req.body.visibility;
 
 	rescollection.visibility = visibility;
 	return rescollection.save().then((newRescollection, err) => {
-		
 		if (err) {
 			return res.status(400).json({
-				error: "Failed to change visibility of this Collection",
+				error: "Failed to change visibility of this collection",
 			});
 		}
 		res.json({
-			message: "Collection's Visiblity Changed",
+			message: "Collection's visiblity changed",
 			newRescollection,
 		});
 	});
 };
 
 exports.changeCategoryOfResCollection = (req, res) => {
-	
 	const rescollection = req.rescollection;
 	const category = req.body.category;
 
@@ -266,11 +254,11 @@ exports.changeCategoryOfResCollection = (req, res) => {
 	return rescollection.save().then((newRescollection, err) => {
 		if (err) {
 			return res.status(400).json({
-				error: "Failed to change category of this Collection",
+				error: "Failed to change category of this collection",
 			});
 		}
 		res.json({
-			message: "Collection's category Changed",
+			message: "Collection's category changed",
 			newRescollection,
 		});
 	});
@@ -283,7 +271,7 @@ exports.changeTagsOfResCollection = (req, res) => {
 	return rescollection.save().then((newRescollection, err) => {
 		if (err) {
 			return res.status(400).json({
-				error: "Failed to change tags of this Collection",
+				error: "Failed to change tags of this collection",
 			});
 		}
 		res.json({
@@ -300,7 +288,7 @@ exports.changeDescriptionOfResCollection = (req, res) => {
 	return rescollection.save().then((newRescollection, err) => {
 		if (err) {
 			return res.status(400).json({
-				error: "Failed to change description of this Collection",
+				error: "Failed to change description of this collection",
 			});
 		}
 		res.json({
@@ -331,10 +319,10 @@ exports.searchResCollections = (req, res, searchQuery) => {
 			return this.getErrorMesageInJson(
 				res,
 				400,
-				"Cannot get rescollectionById"
+				"Sorry, we cannot search collections for " + searchQuery
 			);
 		}
-		
+
 		const rescols = rescollections.filter((rc) => rc.visibility === "PUBLIC");
 		res.status(200).json({ resCollection: rescols });
 	});
@@ -353,15 +341,10 @@ exports.star = (req, res) => {
 		{ new: true },
 		(error, user) => {
 			if (error) {
-
-				return getErrorMesageInJson(
-					res,
-					400,
-					"Error in adding starred in user info"
-				);
+				return getErrorMesageInJson(res, 400, "Cannot star this collection");
 			}
 			if (!user)
-				return getErrorMesageInJson(res, 400, "Cannot update the user");
+				return getErrorMesageInJson(res, 400, "Cannot star this collection");
 
 			ResCollection.findOneAndUpdate(
 				{ _id: collectionId },
@@ -369,15 +352,18 @@ exports.star = (req, res) => {
 				{ new: true },
 				(error, rescol) => {
 					if (error) {
-
 						return getErrorMesageInJson(
 							res,
 							400,
-							"Error in adding stars in res col info"
+							"Cannot star this collection"
 						);
 					}
 					if (!rescol)
-						return getErrorMesageInJson(res, 400, "Cannot update the res col");
+						return getErrorMesageInJson(
+							res,
+							400,
+							"Cannot star this collection"
+						);
 
 					res.status(200).json(rescol);
 				}
@@ -395,15 +381,10 @@ exports.unstar = (req, res) => {
 		{ new: true },
 		(error, user) => {
 			if (error) {
-
-				return getErrorMesageInJson(
-					res,
-					400,
-					"Error in removing starred in user info"
-				);
+				return getErrorMesageInJson(res, 400, "Cannot unstar this collection");
 			}
 			if (!user)
-				return getErrorMesageInJson(res, 400, "Cannot update the user");
+				return getErrorMesageInJson(res, 400, "Cannot unstar this collection");
 
 			ResCollection.findOneAndUpdate(
 				{ _id: collectionId },
@@ -411,15 +392,18 @@ exports.unstar = (req, res) => {
 				{ new: true },
 				(error, rescol) => {
 					if (error) {
-
 						return getErrorMesageInJson(
 							res,
 							400,
-							"Error in removing stars in res col info"
+							"Cannot unstar this collection"
 						);
 					}
 					if (!rescol)
-						return getErrorMesageInJson(res, 400, "Cannot update the res col");
+						return getErrorMesageInJson(
+							res,
+							400,
+							"Cannot unstar this collection"
+						);
 
 					res.status(200).json(rescol);
 				}
@@ -443,6 +427,7 @@ exports.getTopPicks = (req, res) => {
 				description: 1,
 				views: 1,
 				stars: 1,
+				category: 1,
 			},
 		},
 		{
@@ -459,34 +444,18 @@ exports.getTopPicks = (req, res) => {
 		});
 };
 
-exports.getUser = (req, res) => {
-	User.findOne({ _id: req.profile._id })
-		.populate("starred")
-		.exec((error, user) => {
-			if (error || !user) {
-				
-				res.status(400).json({ error: "Cannot get user" });
-			} else {
-				res.status(200).json(user);
-			}
-		});
-};
-
 exports.getResCollectionByCategory = (req, res) => {
 	ResCollection.find({
 		category: req.body.category,
 		visibility: "PUBLIC",
 	}).exec((error, rescols) => {
 		if (error || !rescols) {
-
-			res.status(400).json({ error: "Cannot get top picks" });
+			res.status(400).json({ error: "Cannot collections by category" });
 		} else {
 			res.status(200).json(rescols);
 		}
 	});
 };
-
-
 
 exports.extractMetadata = (req, res, next) => {
 	async function extractMetadataInner(link) {
@@ -541,7 +510,7 @@ exports.extractMetadata = (req, res, next) => {
 		}
 		var metas = doc.window.document.querySelectorAll("meta");
 		for (var i = 0; i < metas.length; i++) {
-			var content = metas[i].getAttribute("content"); 
+			var content = metas[i].getAttribute("content");
 
 			if (metas[i].getAttribute("name") === "author") author = content;
 
@@ -574,10 +543,8 @@ exports.extractMetadata = (req, res, next) => {
 				favicon: favicon,
 			};
 
-
 			req.metadata = reso;
 			next();
-
 		} else if (ogSiteName.toLowerCase() == "youtube") {
 			customtype = "Youtube";
 
@@ -612,7 +579,6 @@ exports.extractMetadata = (req, res, next) => {
 
 					req.metadata = reso;
 					next();
-
 				})
 				.catch((error) => {
 					var reso = {
@@ -631,7 +597,6 @@ exports.extractMetadata = (req, res, next) => {
 
 					req.metadata = reso;
 					next();
-
 				});
 		} else if (ogSiteName.toLowerCase() == "twitter") {
 			customtype = "Twitter";
@@ -684,7 +649,6 @@ exports.extractMetadata = (req, res, next) => {
 
 						req.metadata = reso;
 						next();
-
 					})
 					.catch((error) => {
 						var reso = {
@@ -709,7 +673,6 @@ exports.extractMetadata = (req, res, next) => {
 				next();
 			}
 		} else {
-
 			customtype = ogType;
 			var reso = {
 				author: author,
@@ -727,7 +690,6 @@ exports.extractMetadata = (req, res, next) => {
 
 			req.metadata = reso;
 			next();
-
 		}
 	}
 

@@ -26,10 +26,8 @@ const {
 	star,
 	unstar,
 	extractMetadata,
-	deleteNull,
 	getTopPicks,
 	changeDescriptionOfResCollection,
-	getUser,
 	getResCollectionByCategory,
 } = require("../controllers/rescollection");
 
@@ -107,7 +105,6 @@ router.get(
 	"/user/all/:userId",
 	isSignedIn,
 	isAuthenticated,
-	isHisOwn,
 	getResourcesOfTheUser
 );
 
@@ -115,7 +112,6 @@ router.get(
 	"/name/id/:userId",
 	isSignedIn,
 	isAuthenticated,
-	isHisOwn,
 	getNameAndIdOfCollection
 );
 
@@ -127,7 +123,6 @@ router.delete(
 	deleteResCollection
 );
 
-
 router.get("/:userId/star/:collectionId", isSignedIn, isAuthenticated, star);
 
 router.get(
@@ -138,8 +133,6 @@ router.get(
 );
 
 router.get("/top/picks/:userId", isSignedIn, isAuthenticated, getTopPicks);
-
-router.get("/getuser/:userId", isSignedIn, isAuthenticated, getUser);
 
 router.post(
 	"/by/category/:userId",

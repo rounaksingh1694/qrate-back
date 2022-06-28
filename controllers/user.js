@@ -13,16 +13,15 @@ exports.getUserById = (req, res, next, id) => {
 };
 
 exports.getUser = (req, res) => {
-	req.profile.salt = undefined;
-	req.profile.encry_password = undefined;
-	rescollection
-		.populate("user", USER_FIELDS_TO_POPULATE)
-		.execPopulate()
-		.then(() => {
-			req.rescollection = rescollection;
-			next();
+	User.findOne({ _id: req.profile._id })
+		.populate("starred")
+		.exec((error, user) => {
+			if (error || !user) {
+				res.status(400).json({ error: "Cannot get details" });
+			} else {
+				res.status(200).json(user);
+			}
 		});
-	return res.json(req.profile);
 };
 
 exports.updateUser = (req, res) => {
