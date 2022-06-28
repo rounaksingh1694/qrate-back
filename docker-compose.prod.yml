@@ -10,4 +10,4 @@ services:
         NODE_ENV: production
     environment:
       - NODE_ENV=production
-    command: node server.js
+    command: node app.js
