@@ -7,7 +7,6 @@ exports.getUserById = (req, res, next, id) => {
 				error: err,
 			});
 		}
-		// console.log("USER BY ID", user);
 		req.profile = user;
 		next();
 	});
@@ -20,7 +19,6 @@ exports.getUser = (req, res) => {
 		.populate("user", USER_FIELDS_TO_POPULATE)
 		.execPopulate()
 		.then(() => {
-			console.log("ResCollection BY ID", rescollection);
 			req.rescollection = rescollection;
 			next();
 		});
@@ -65,7 +63,7 @@ exports.pushResourceCollection = (req, res, next) => {
 		{ new: true }, //jo error, obj aayega usme updated obj aayega
 		(err, purchases) => {
 			return res.status(400).json({
-				error: "Unable to save purchase list",
+				error: "Unable to save resource collection",
 			});
 		}
 	);

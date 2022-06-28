@@ -11,7 +11,7 @@ const categories = [
 	"NEUROSCIENCE",
 	"DOPAMINE BOOSTER",
 	"MATHEMATICS",
-	"NONE",
+	"MISCELLANEOUS",
 ];
 
 const LinkSchema = new mongoose.Schema({
@@ -44,7 +44,7 @@ const ResCollectionSchema = new mongoose.Schema({
 	category: {
 		type: String,
 		enum: categories,
-		default: "NONE",
+		default: "MISCELLANEOUS",
 	},
 	tags: {
 		type: String,

@@ -10,9 +10,6 @@ const cors = require("cors");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const rescollectionRoutes = require("./routes/rescollection");
-const metadataRoutes = require("./routes/linkmetadata");
-const ytRoutes = require("./routes/ytplaylistRoutes");
-const articleDataRoutes = require("./routes/articledata");
 
 mongoose
 	.connect(process.env.LINODE_DATABASE_HOST, {
@@ -37,9 +34,6 @@ app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api/collection/", rescollectionRoutes);
-app.use("/api", metadataRoutes);
-app.use("/api", ytRoutes);
-app.use("/api", articleDataRoutes);
 
 //dot env see docs for more explaination
 const port = process.env.PORT || 8000;

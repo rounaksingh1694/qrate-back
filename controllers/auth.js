@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const { check, validationResult } = require("express-validator");
+const {validationResult } = require("express-validator");
 var jwt = require("jsonwebtoken");
 var expressJwt = require("express-jwt");
 
@@ -15,7 +15,6 @@ exports.signup = (req, res) => {
 	const user = new User(req.body);
 	user.save((error, user) => {
 		if (error) {
-			console.log(error);
 			return res.status(400).json({
 				error: "User with this email already exists",
 			});
@@ -63,7 +62,6 @@ exports.signin = (req, res) => {
 };
 
 exports.signout = (req, res) => {
-	console.log("REQBODY", req.body);
 	res.clearCookie("token");
 	res.json({
 		message: "User signout",

@@ -8,6 +8,7 @@ const {
 } = require("../controllers/user");
 const { isSignedIn, isAuthenticated, isAdmin } = require("../controllers/auth");
 const {
+	isHisOwn,
 	isHisOwnOrPublic,
 	getResourcesOfTheUser,
 	getResCollectionById,
@@ -55,6 +56,7 @@ router.post(
 	"/update/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	extractMetadata,
 	addALinktoResCollection
 );
@@ -63,6 +65,7 @@ router.post(
 	"/delete/link/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	deleteALinkFromResCollection
 );
 
@@ -70,6 +73,7 @@ router.post(
 	"/change/visibility/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	changeVisibilityOfResCollection
 );
 
@@ -77,6 +81,7 @@ router.post(
 	"/change/category/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	changeCategoryOfResCollection
 );
 
@@ -84,6 +89,7 @@ router.post(
 	"/change/tags/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	changeTagsOfResCollection
 );
 
@@ -91,6 +97,7 @@ router.post(
 	"/change/description/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	changeDescriptionOfResCollection
 );
 
@@ -100,6 +107,7 @@ router.get(
 	"/user/all/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	getResourcesOfTheUser
 );
 
@@ -107,6 +115,7 @@ router.get(
 	"/name/id/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	getNameAndIdOfCollection
 );
 
@@ -114,10 +123,10 @@ router.delete(
 	"/delete/:collectionId/:userId",
 	isSignedIn,
 	isAuthenticated,
+	isHisOwn,
 	deleteResCollection
 );
 
-router.delete("/deletenull/:userId", isSignedIn, isAuthenticated, deleteNull);
 
 router.get("/:userId/star/:collectionId", isSignedIn, isAuthenticated, star);
 
