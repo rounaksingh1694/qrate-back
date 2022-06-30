@@ -1,3 +1,4 @@
+const { ResCollection } = require("../models/rescollection");
 const User = require("../models/user");
 
 exports.getUserById = (req, res, next, id) => {
@@ -19,7 +20,18 @@ exports.getUser = (req, res) => {
 			if (error || !user) {
 				res.status(400).json({ error: "Cannot get details" });
 			} else {
-				res.status(200).json(user);
+				ResCollection.populate(
+					user.starred,
+					{ path: "user", select: "_id name" },
+					(err, starred) => {
+						if (err || !starred) {
+							res.status(400).json({ error: "Cannot get details" });
+						} else {
+							user.starred = starred;
+							res.status(200).json(user);
+						}
+					}
+				);
 			}
 		});
 };

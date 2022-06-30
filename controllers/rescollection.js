@@ -314,17 +314,29 @@ exports.searchResCollections = (req, res, searchQuery) => {
 				],
 			},
 		},
-	]).exec((error, rescollections) => {
-		if (error || !rescollections) {
+	]).exec((error, rescols) => {
+		if (error || !rescols) {
 			return this.getErrorMesageInJson(
 				res,
 				400,
 				"Sorry, we cannot search collections for " + searchQuery
 			);
+		} else {
+			ResCollection.populate(
+				rescols,
+				{ path: "user", select: "_id name" },
+				(err, rescollections) => {
+					if (err || !rescollections) {
+						res.status(400).json({ error: "Cannot get top picks" });
+					} else {
+						const rescols = rescollections.filter(
+							(rc) => rc.visibility === "PUBLIC"
+						);
+						res.status(200).json({ resCollection: rescols });
+					}
+				}
+			);
 		}
-
-		const rescols = rescollections.filter((rc) => rc.visibility === "PUBLIC");
-		res.status(200).json({ resCollection: rescols });
 	});
 };
 
@@ -428,6 +440,7 @@ exports.getTopPicks = (req, res) => {
 				views: 1,
 				stars: 1,
 				category: 1,
+				user: 1,
 			},
 		},
 		{
@@ -439,7 +452,17 @@ exports.getTopPicks = (req, res) => {
 			if (error || !rescols) {
 				res.status(400).json({ error: "Cannot get top picks" });
 			} else {
-				res.status(200).json(rescols);
+				ResCollection.populate(
+					rescols,
+					{ path: "user", select: "_id name" },
+					(err, nRescols) => {
+						if (err || !nRescols) {
+							res.status(400).json({ error: "Cannot get top picks" });
+						} else {
+							res.status(200).json(nRescols);
+						}
+					}
+				);
 			}
 		});
 };
@@ -448,13 +471,15 @@ exports.getResCollectionByCategory = (req, res) => {
 	ResCollection.find({
 		category: req.body.category,
 		visibility: "PUBLIC",
-	}).exec((error, rescols) => {
-		if (error || !rescols) {
-			res.status(400).json({ error: "Cannot collections by category" });
-		} else {
-			res.status(200).json(rescols);
-		}
-	});
+	})
+		.populate("user", "_id name")
+		.exec((error, rescols) => {
+			if (error || !rescols) {
+				res.status(400).json({ error: "Cannot collections by category" });
+			} else {
+				res.status(200).json(rescols);
+			}
+		});
 };
 
 exports.extractMetadata = (req, res, next) => {
