@@ -5,6 +5,7 @@ services:
       - "8000:80"
   qrate-backend:
     build:
+      network: host
       context: .
       args:
         NODE_ENV: production
