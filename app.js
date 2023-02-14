@@ -12,7 +12,7 @@ const authRoutes = require("./routes/auth");
 const rescollectionRoutes = require("./routes/rescollection");
 
 mongoose
-	.connect(process.env.LINODE_DATABASE_HOST, {
+	.connect(process.env.ATLAS_DATABASE_HOST, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 		useCreateIndex: true,
